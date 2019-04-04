@@ -1,17 +1,38 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package jimenezmorenosergioprac2;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
- * @author PC
+ * @author Sergio Jiménez Moreno
  */
 public class RepresentaProceso {
     private int idProceso;
-    private ArrayList<Integer> listaPaginas;
+    private List<Integer> listaPaginas;
+
+    public RepresentaProceso(int idProceso) {
+        this.idProceso = idProceso;
+        this.listaPaginas = new ArrayList<>();
+        this.listaPaginas.add(1);
+        this.listaPaginas.add(2);
+    }
+
+    public int getIdProceso() {
+        return idProceso;
+    }
+    
+    public void addPagina(int pagina){
+        listaPaginas.add(pagina);
+    }
+    
+    public void sustituyePagina(int pagina){
+        listaPaginas.remove(0);
+        listaPaginas.add(pagina);
+    }
+    
+    public int paginasAsignadas(){
+        return listaPaginas.size();
+    }
+    
 }
