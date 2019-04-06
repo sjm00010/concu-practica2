@@ -1,5 +1,6 @@
 package jimenezmorenosergioprac2;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -12,6 +13,7 @@ import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 public class MonitorMemoria {
     // Constantes
     private final static int MAX_MARCOS = 4;
+    private final static int NUM_MARCOS = 20;
     
     // Variables
     private int numMarcos;
@@ -19,6 +21,15 @@ public class MonitorMemoria {
     private HashMap<Integer,RepresentaProceso> listaProcesos;
     private List<Peticion> listaPetiones;
     private List<Peticion> listaPetionesLiberacion;
+
+    public MonitorMemoria() {
+        numMarcos = NUM_MARCOS;
+        exmMonitor = new Semaphore(1);
+        listaProcesos = new HashMap<>();
+        listaPetiones = new ArrayList<>();
+        listaPetionesLiberacion = new ArrayList<>();
+    }
+    
     
     // Funciones publicas
     public boolean compruebaPagina(int idProceso, int pagina) throws InterruptedException{
@@ -76,9 +87,11 @@ public class MonitorMemoria {
                 } else {
                     falloPagina(peticion.getIdProceso(), peticion.getPagina());
                 }
+                peticion.desbloqueaProceso();
             } else {
                 Peticion peticion = removeFallo();
                 falloPagina(peticion.getIdProceso(), peticion.getPagina());
+                peticion.desbloqueaProceso();
             }
         }finally{
             exmMonitor.release();

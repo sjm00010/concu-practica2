@@ -1,5 +1,6 @@
 package jimenezmorenosergioprac2;
 
+import java.util.concurrent.Semaphore;
 import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 
 /**
@@ -10,11 +11,13 @@ public class Peticion {
     private int idProceso;
     private int pagina;
     private Tipo tipo;
+    private Semaphore blockProceso;
 
-    public Peticion(int idProceso, int pagina, Tipo tipo) {
+    public Peticion(int idProceso, int pagina, Tipo tipo, Semaphore blockProceso) {
         this.idProceso = idProceso;
         this.pagina = pagina;
         this.tipo = tipo;
+        this.blockProceso = blockProceso;
     }
 
     public int getIdProceso() {
@@ -29,4 +32,7 @@ public class Peticion {
         return tipo;
     }
     
+    public void desbloqueaProceso() {
+        blockProceso.release();
+    }
 }
