@@ -13,6 +13,17 @@ public class MonitorMemoria {
     private Semaphore exmMonitor;
     private List<RepresentaProceso> listaProcesos;
     
+    // Funciones publicas
+    public boolean compruebaPagina(int idProceso, int pagina){
+        boolean resultado = false;
+        for (RepresentaProceso proceso : listaProcesos) {
+            if(proceso.getIdProceso() == idProceso){
+                resultado = proceso.compruebaPagina(pagina);
+            }
+        }
+        return resultado;
+    }
+    
     
     
     // Funciones auxiliares

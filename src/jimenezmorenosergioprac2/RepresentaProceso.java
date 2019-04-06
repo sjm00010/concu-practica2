@@ -35,4 +35,13 @@ public class RepresentaProceso {
         return listaPaginas.size();
     }
     
+    public boolean compruebaPagina(int pagina){
+        boolean resultado = false;
+        for (Integer paginaActual : listaPaginas) {
+            if(paginaActual == pagina)
+                resultado = true;
+        }
+        return resultado;
+    }
+    
 }
