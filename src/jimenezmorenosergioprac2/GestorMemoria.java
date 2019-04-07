@@ -1,5 +1,7 @@
 package jimenezmorenosergioprac2;
 
+import java.sql.Time;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,9 +19,14 @@ public class GestorMemoria implements Runnable{
     
     @Override
     public void run() {
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException ex) {
+           
+        }
         boolean fin = false;
         System.out.println("GESTOR - Va a iniciar la ejecución");
-        while(fin){
+        while(!fin){
             try {
                 monitor.atenderPeticionLiberacion();
                 monitor.atenderPeticion();
