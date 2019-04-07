@@ -20,7 +20,7 @@ public class MonitorMemoria {
     private Semaphore exmMonitor;
     private HashMap<Integer,RepresentaProceso> listaProcesos;
     private List<Peticion> listaPetiones;
-    private List<Peticion> listaPetionesLiberacion;
+    private List<Integer> listaPetionesLiberacion;
 
     public MonitorMemoria() {
         numMarcos = NUM_MARCOS;
@@ -56,10 +56,10 @@ public class MonitorMemoria {
         }
     }
     
-    public void addPeticionLiberacion(Peticion peticion) throws InterruptedException{
+    public void addPeticionLiberacion(int idProceso) throws InterruptedException{
         exmMonitor.acquire();
         try {
-            listaPetionesLiberacion.add(peticion);
+            listaPetionesLiberacion.add(idProceso);
         }finally{
             exmMonitor.release();
         }
@@ -79,21 +79,22 @@ public class MonitorMemoria {
     
     public void atenderPeticion() throws InterruptedException{
         exmMonitor.acquire();
+        Peticion peticion = null;
         try{
             if (numMarcos > 1) {
-                Peticion peticion = listaPetiones.remove(0);
+                peticion = listaPetiones.remove(0);
                 if (peticion.getTipo() == Tipo.CARGA) {
                     asignarMarcosInicio(peticion.getIdProceso());
                 } else {
                     falloPagina(peticion.getIdProceso(), peticion.getPagina());
                 }
-                peticion.desbloqueaProceso();
             } else {
-                Peticion peticion = removeFallo();
+                peticion = removeFallo();
                 falloPagina(peticion.getIdProceso(), peticion.getPagina());
-                peticion.desbloqueaProceso();
+                
             }
         }finally{
+            peticion.desbloqueaProceso();
             exmMonitor.release();
         }
     }
@@ -133,8 +134,8 @@ public class MonitorMemoria {
         }
     }
     
-    private void liberarMarcos(Peticion peticion){
-        RepresentaProceso proceso = listaProcesos.remove(peticion.getIdProceso());
+    private void liberarMarcos(int idProceso){
+        RepresentaProceso proceso = listaProcesos.remove(idProceso);
         if(proceso != null){
             numMarcos += proceso.paginasAsignadas();
         }
