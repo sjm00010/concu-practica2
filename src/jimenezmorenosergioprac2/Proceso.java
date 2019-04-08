@@ -54,7 +54,7 @@ public class Proceso implements Callable<Integer>{
             int tiempo = fin.getSeconds() - inicio.getSeconds();
             System.out.println("PROCESO("+id+") - Finalizado, tiempo de ejecución : "+tiempo);
         } catch (InterruptedException ex) {
-            System.out.println("PROCESO("+id+") - ERROR : Proceso finalizado.");
+            System.out.println("PROCESO("+id+") - Proceso interrumpido.");
         }
         return 0;
     }

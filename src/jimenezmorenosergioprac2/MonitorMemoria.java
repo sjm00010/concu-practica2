@@ -151,4 +151,10 @@ public class MonitorMemoria {
         }
         return resultado;
     }
+    
+    public void visualiza() {
+        System.out.println("Peticiones de Liberación : "+listaPetionesLiberacion);
+        System.out.println("Peticiones de Fallo de Página : "+listaPetiones);
+    }
+
 }

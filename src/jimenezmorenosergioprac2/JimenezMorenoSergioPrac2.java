@@ -20,6 +20,7 @@ public class JimenezMorenoSergioPrac2 {
     public final static int PAGINA_MIN = 4;
     public final static int PAGINA_ALEATORIA = 4;
     public static final int TIEMPO = 1;
+    public static final int TIEMPO_PROCESO = 2;
     public static final int TIEMPO_ESPERA = 3;
     
     /**
@@ -29,6 +30,7 @@ public class JimenezMorenoSergioPrac2 {
         System.out.println("Hilo(PRINCIPAL) inicia su ejecución");
         // Creamos el servicio de ejecución
         ExecutorService ejecucion = Executors.newCachedThreadPool();
+        //ExecutorService ejecucionGestor = Executors.newCachedThreadPool();
         
         // Lista de tareas para su interrupción
         ArrayList<Future<?>> listaTareas = new ArrayList();
@@ -39,8 +41,8 @@ public class JimenezMorenoSergioPrac2 {
         GestorMemoria gestor =  new GestorMemoria(monitor);
         
         // Ejecucion del GestorMemoria
-        Future<?> tarea = ejecucion.submit(gestor);    
-        listaTareas.add(tarea);
+        Future<?> tareaGestor = ejecucion.submit(gestor);    
+        listaTareas.add(tareaGestor); // Comentar para 2 solucion
         
         System.out.println("Hilo(PRINCIPAL) crea y ejecuta los Procesos durante "+TIEMPO_ESPERA+" minutos");
         Date inicio = new Date();
@@ -48,21 +50,32 @@ public class JimenezMorenoSergioPrac2 {
         while( (new Date().getMinutes() - inicio.getMinutes()) < TIEMPO_ESPERA ){
             int totalPaginas = ThreadLocalRandom.current().nextInt(PAGINA_ALEATORIA)+PAGINA_MIN;
             Proceso nuevoProceso = new Proceso(monitor, idProceso, totalPaginas);
-            Future<?> tareaProceso = ejecucion.submit(gestor);
+            Future<?> tareaProceso = ejecucion.submit(nuevoProceso);
             listaTareas.add(tareaProceso);
+            idProceso++;
+            try {
+                TimeUnit.SECONDS.sleep(ThreadLocalRandom.current().nextInt(TIEMPO_PROCESO)+TIEMPO);
+            } catch (InterruptedException ex) {
+                System.out.println("Hilo(PRINCIPAL) error en la creación de procesos.");
+            }
         }
         
         System.out.println("Hilo(PRINCIPAL) va a cancelar las tareas restantes.");
+        //tareaGestor.cancel(true);
         for ( Future<?>  tareaActual : listaTareas )
             tareaActual.cancel(true);
         
+        //ejecucionGestor.shutdown();
         ejecucion.shutdown();
         
         try {
+            //ejecucionGestor.awaitTermination(TIEMPO, TimeUnit.DAYS);
             ejecucion.awaitTermination(TIEMPO, TimeUnit.DAYS);
         } catch (InterruptedException ex) {
             System.out.println("Hilo(PRINCIPAL) error en la espera de la finalización.");
         }
+        System.out.println("Hilo(PRINCIPAL) procesos finalizados, mostrando peticiones no atendidas :");
+        monitor.visualiza();
         
         System.out.println("Hilo(PRINCIPAL) finaliza su ejecución");
     }

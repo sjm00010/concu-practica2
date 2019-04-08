@@ -19,15 +19,11 @@ public class GestorMemoria implements Runnable{
     
     @Override
     public void run() {
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException ex) {
-           
-        }
         boolean fin = false;
         System.out.println("GESTOR - Va a iniciar la ejecución");
         while(!fin){
             try {
+                System.out.println("GESTOR - Va a atender una petición");
                 monitor.atenderPeticionLiberacion();
                 monitor.atenderPeticion();
             } catch (InterruptedException ex) {
@@ -35,6 +31,7 @@ public class GestorMemoria implements Runnable{
                 fin = true;
             }
         }
+        System.out.println("GESTOR - Va a finalizar.");
     }
     
 }
