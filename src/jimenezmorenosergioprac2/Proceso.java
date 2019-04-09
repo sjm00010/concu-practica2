@@ -1,28 +1,23 @@
 package jimenezmorenosergioprac2;
 
-import java.security.Timestamp;
 import java.util.Date;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.PRIMERA_POSICION;
 import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 
 /**
  *
  * @author Sergio Jiménez Moreno
  */
-public class Proceso implements Callable<Integer>{
+public class Proceso implements Runnable{
     //Constantes
     private final static int MIN_ITERACIONES = 8;
-    private final static int RANGO_ITERACIONES = 4;
+    private final static int RANGO_ITERACIONES = 5;
     private final static int MIN_PAGINA = 1;
     private final static int PAGINA_INVALIDA = -1;
     private final static int TIEMPO_MIN = 1;
-    private final static int TIEMPO_ALEATORIO = 1;
+    private final static int TIEMPO_ALEATORIO = 2;
     
     // Variables
     private MonitorMemoria monitor;
@@ -38,26 +33,24 @@ public class Proceso implements Callable<Integer>{
     }
     
     @Override
-    public Integer call() {
+    public void run() {
         try {
             Date inicio = new Date();
             System.out.println("PROCESO("+id+") - Inicio : "+inicio);
             peticionMarcos();
             for (int i = 0; i < numIteraciones; i++) {
+                TimeUnit.SECONDS.sleep(ThreadLocalRandom.current().nextInt(TIEMPO_ALEATORIO)+TIEMPO_MIN);
                 int paginaSolicitada = generaPagina();
                 if( !monitor.compruebaPagina(id, paginaSolicitada) ){
                     peticionFallo(paginaSolicitada);
                 }
-                TimeUnit.SECONDS.sleep(ThreadLocalRandom.current().nextInt(TIEMPO_ALEATORIO)+TIEMPO_MIN);
             }
             peticionLiberacion();
             Date fin = new Date();
-            int tiempo = fin.getSeconds() - inicio.getSeconds();
-            System.out.println("PROCESO("+id+") - Finalizado, tiempo de ejecución : "+tiempo+" segundos");
+            tiempoProceso(inicio, fin);
         } catch (InterruptedException ex) {
             System.out.println("PROCESO("+id+") - Proceso interrumpido.");
         }
-        return 0;
     }
     
     private int generaInteraciones(){
@@ -69,21 +62,23 @@ public class Proceso implements Callable<Integer>{
     }
     
     private void peticionMarcos() throws InterruptedException{
-        Semaphore esperaProceso = new Semaphore(PRIMERA_POSICION);
-        Peticion peticionCarga = new Peticion(id, PAGINA_INVALIDA, Tipo.CARGA, esperaProceso);
+        Peticion peticionCarga = new Peticion(id, PAGINA_INVALIDA, Tipo.CARGA);
         monitor.addPeticion(peticionCarga);
-        esperaProceso.acquire();
     }
     
     private void peticionFallo(int pagina) throws InterruptedException{
-        // El semaforo debe estar dentro del monitor
-        Semaphore esperaProceso = new Semaphore(PRIMERA_POSICION);
-        Peticion peticionCarga = new Peticion(id, pagina, Tipo.FALLO, esperaProceso);
+        Peticion peticionCarga = new Peticion(id, pagina, Tipo.FALLO);
         monitor.addPeticion(peticionCarga);
-        esperaProceso.acquire();
     }
     
     private void peticionLiberacion() throws InterruptedException{
         monitor.addPeticionLiberacion(id);
+    }
+    
+    private void tiempoProceso(Date inicio, Date fin){
+        long tiempoServicio;
+        tiempoServicio = fin.getTime() - inicio.getTime();
+        tiempoServicio = TimeUnit.SECONDS.convert(tiempoServicio, TimeUnit.MILLISECONDS);
+        System.out.println("PROCESO("+id+") - Finalizado, tiempo de ejecución : "+tiempoServicio+" segundos");
     }
 }

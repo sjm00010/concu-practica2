@@ -7,8 +7,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -17,12 +15,14 @@ import java.util.logging.Logger;
 public class JimenezMorenoSergioPrac2 {
 
     public enum Tipo{CARGA, FALLO};
-    public final static int PAGINA_MIN = 4;
-    public final static int PAGINA_ALEATORIA = 4;
+    public static final int PAGINA_MIN = 4;
+    public static final int PAGINA_ALEATORIA = 5;
     public static final int TIEMPO = 1;
-    public static final int TIEMPO_PROCESO = 2;
+    public static final int TIEMPO_PROCESO = 3;
     public static final int TIEMPO_ESPERA = 3;
     public static final int PRIMERA_POSICION = 0;
+    public static final int SEM_EXM = 1;
+    public static final int SEM_SINC = 0;
     
     /**
      * @param args the command line arguments
@@ -44,11 +44,13 @@ public class JimenezMorenoSergioPrac2 {
         
         // Ejecucion del GestorMemoria
         Future<?> tareaGestor = ejecucion.submit(gestor);
+        listaTareas.add(tareaGestor);
         
         System.out.println("Hilo(PRINCIPAL) crea y ejecuta los Procesos durante "+TIEMPO_ESPERA+" minutos");
-        Date inicio = new Date();
         int idProceso = 1;
-        while( (new Date().getMinutes() - inicio.getMinutes()) < TIEMPO_ESPERA ){
+        Date inicio = new Date();
+        Date fin;
+        do{
             int totalPaginas = ThreadLocalRandom.current().nextInt(PAGINA_ALEATORIA)+PAGINA_MIN;
             Proceso nuevoProceso = new Proceso(monitor, idProceso, totalPaginas);
             Future<?> tareaProceso = ejecucion.submit(nuevoProceso);
@@ -59,7 +61,8 @@ public class JimenezMorenoSergioPrac2 {
             } catch (InterruptedException ex) {
                 System.out.println("Hilo(PRINCIPAL) error en la creación de procesos.");
             }
-        }
+            fin = new Date();
+        }while( compruebaTiempo(inicio, fin) < TIEMPO_ESPERA );
         
         System.out.println("Hilo(PRINCIPAL) va a cancelar las tareas restantes.");
         for ( Future<?>  tareaActual : listaTareas )
@@ -78,4 +81,10 @@ public class JimenezMorenoSergioPrac2 {
         System.out.println("Hilo(PRINCIPAL) finaliza su ejecución");
     }
     
+    public static long compruebaTiempo(Date inicio, Date fin){
+        long tiempoServicio;
+        tiempoServicio = fin.getTime() - inicio.getTime();
+        tiempoServicio = TimeUnit.MINUTES.convert(tiempoServicio, TimeUnit.MILLISECONDS);
+        return tiempoServicio;
+    } 
 }
