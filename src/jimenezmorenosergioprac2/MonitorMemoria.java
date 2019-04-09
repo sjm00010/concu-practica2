@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.PRIMERA_POSICION;
 import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 
 /**
@@ -13,7 +14,9 @@ import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 public class MonitorMemoria {
     // Constantes
     private final static int MAX_MARCOS = 4;
+    private final static int MARCOS_INICIALES = 2;
     private final static int NUM_MARCOS = 20;
+    private final static int SEM_EXM = 1;
     
     // Variables
     private int numMarcos;
@@ -21,10 +24,11 @@ public class MonitorMemoria {
     private HashMap<Integer,RepresentaProceso> listaProcesos;
     private List<Peticion> listaPetiones;
     private List<Integer> listaPetionesLiberacion;
+    // HAcer lista de semaforos para los procesos :_D
 
     public MonitorMemoria() {
         numMarcos = NUM_MARCOS;
-        exmMonitor = new Semaphore(1);
+        exmMonitor = new Semaphore(SEM_EXM);
         listaProcesos = new HashMap<>();
         listaPetiones = new ArrayList<>();
         listaPetionesLiberacion = new ArrayList<>();
@@ -69,8 +73,8 @@ public class MonitorMemoria {
         exmMonitor.acquire();
         try {
             while(!listaPetionesLiberacion.isEmpty()){
-                liberarMarcos(listaPetionesLiberacion.get(0));
-                listaPetionesLiberacion.remove(0);
+                liberarMarcos(listaPetionesLiberacion.get(PRIMERA_POSICION));
+                listaPetionesLiberacion.remove(PRIMERA_POSICION);
             }
         }finally{
             exmMonitor.release();
@@ -79,29 +83,32 @@ public class MonitorMemoria {
     
     public void atenderPeticion() throws InterruptedException{
         exmMonitor.acquire();
-        Peticion peticion = null;
         try{
-            if (numMarcos > 1) {
-                peticion = listaPetiones.remove(0);
-                if (peticion.getTipo() == Tipo.CARGA) {
-                    asignarMarcosInicio(peticion.getIdProceso());
+            if(!listaPetiones.isEmpty()){
+                Peticion peticion;
+                if (numMarcos > 1) {
+                    peticion = listaPetiones.remove(PRIMERA_POSICION);
+                    if (peticion.getTipo() == Tipo.CARGA) {
+                        asignarMarcosInicio(peticion.getIdProceso());
+                    } else {
+                        falloPagina(peticion.getIdProceso(), peticion.getPagina());
+                    }
                 } else {
-                    falloPagina(peticion.getIdProceso(), peticion.getPagina());
+                    peticion = removeFallo();
+                    if(peticion != null)
+                        falloPagina(peticion.getIdProceso(), peticion.getPagina());       
                 }
-            } else {
-                peticion = removeFallo();
-                falloPagina(peticion.getIdProceso(), peticion.getPagina());
-                
+                if(peticion != null)
+                    peticion.desbloqueaProceso();
             }
         }finally{
-            peticion.desbloqueaProceso();
             exmMonitor.release();
         }
     }
     
     // Funciones auxiliares
     private void asignarMarcosInicio(int idProceso){
-        numMarcos -= 2;
+        numMarcos -= MARCOS_INICIALES;
         RepresentaProceso nuevoProceso = new RepresentaProceso(idProceso);
         listaProcesos.put(idProceso, nuevoProceso);
     }

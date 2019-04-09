@@ -23,15 +23,16 @@ public class GestorMemoria implements Runnable{
         System.out.println("GESTOR - Va a iniciar la ejecución");
         while(!fin){
             try {
-                System.out.println("GESTOR - Va a atender una petición");
+                //System.out.println("GESTOR - Va a atender una petición");
                 monitor.atenderPeticionLiberacion();
                 monitor.atenderPeticion();
-            } catch (InterruptedException ex) {
-                System.out.println("GESTOR - Va a finalizar");
+            } catch (Exception ex) {
+                System.err.println(ex);
+                System.out.println("GESTOR - Solicitada finalizacion");
                 fin = true;
             }
         }
-        System.out.println("GESTOR - Va a finalizar.");
+        System.out.println("GESTOR - Va a finalizar");
     }
     
 }

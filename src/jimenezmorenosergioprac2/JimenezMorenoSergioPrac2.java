@@ -22,27 +22,28 @@ public class JimenezMorenoSergioPrac2 {
     public static final int TIEMPO = 1;
     public static final int TIEMPO_PROCESO = 2;
     public static final int TIEMPO_ESPERA = 3;
+    public static final int PRIMERA_POSICION = 0;
     
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         System.out.println("Hilo(PRINCIPAL) inicia su ejecución");
+        
         // Creamos el servicio de ejecución
         ExecutorService ejecucion = Executors.newCachedThreadPool();
-        //ExecutorService ejecucionGestor = Executors.newCachedThreadPool();
         
         // Lista de tareas para su interrupción
         ArrayList<Future<?>> listaTareas = new ArrayList();
         
         System.out.println("Hilo(PRINCIPAL) crea y ejecuta el GestoMemoria");
+        
         // Variables
         MonitorMemoria monitor =  new MonitorMemoria();
         GestorMemoria gestor =  new GestorMemoria(monitor);
         
         // Ejecucion del GestorMemoria
-        Future<?> tareaGestor = ejecucion.submit(gestor);    
-        listaTareas.add(tareaGestor); // Comentar para 2 solucion
+        Future<?> tareaGestor = ejecucion.submit(gestor);
         
         System.out.println("Hilo(PRINCIPAL) crea y ejecuta los Procesos durante "+TIEMPO_ESPERA+" minutos");
         Date inicio = new Date();
@@ -61,15 +62,12 @@ public class JimenezMorenoSergioPrac2 {
         }
         
         System.out.println("Hilo(PRINCIPAL) va a cancelar las tareas restantes.");
-        //tareaGestor.cancel(true);
         for ( Future<?>  tareaActual : listaTareas )
             tareaActual.cancel(true);
         
-        //ejecucionGestor.shutdown();
         ejecucion.shutdown();
         
         try {
-            //ejecucionGestor.awaitTermination(TIEMPO, TimeUnit.DAYS);
             ejecucion.awaitTermination(TIEMPO, TimeUnit.DAYS);
         } catch (InterruptedException ex) {
             System.out.println("Hilo(PRINCIPAL) error en la espera de la finalización.");

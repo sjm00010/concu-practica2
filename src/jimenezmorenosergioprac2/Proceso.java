@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.PRIMERA_POSICION;
 import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 
 /**
@@ -52,7 +53,7 @@ public class Proceso implements Callable<Integer>{
             peticionLiberacion();
             Date fin = new Date();
             int tiempo = fin.getSeconds() - inicio.getSeconds();
-            System.out.println("PROCESO("+id+") - Finalizado, tiempo de ejecución : "+tiempo);
+            System.out.println("PROCESO("+id+") - Finalizado, tiempo de ejecución : "+tiempo+" segundos");
         } catch (InterruptedException ex) {
             System.out.println("PROCESO("+id+") - Proceso interrumpido.");
         }
@@ -68,14 +69,15 @@ public class Proceso implements Callable<Integer>{
     }
     
     private void peticionMarcos() throws InterruptedException{
-        Semaphore esperaProceso = new Semaphore(0);
+        Semaphore esperaProceso = new Semaphore(PRIMERA_POSICION);
         Peticion peticionCarga = new Peticion(id, PAGINA_INVALIDA, Tipo.CARGA, esperaProceso);
         monitor.addPeticion(peticionCarga);
         esperaProceso.acquire();
     }
     
     private void peticionFallo(int pagina) throws InterruptedException{
-        Semaphore esperaProceso = new Semaphore(0);
+        // El semaforo debe estar dentro del monitor
+        Semaphore esperaProceso = new Semaphore(PRIMERA_POSICION);
         Peticion peticionCarga = new Peticion(id, pagina, Tipo.FALLO, esperaProceso);
         monitor.addPeticion(peticionCarga);
         esperaProceso.acquire();
