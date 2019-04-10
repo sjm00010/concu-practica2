@@ -2,8 +2,6 @@ package jimenezmorenosergioprac2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
-import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.SEM_SINC;
 
 /**
  *
@@ -13,12 +11,10 @@ public class RepresentaProceso {
     // Variables
     private int idProceso;
     private List<Integer> listaPaginas;
-    private Semaphore exmProceso;
 
     public RepresentaProceso(int idProceso) {
         this.idProceso = idProceso;
         this.listaPaginas = new ArrayList<>();
-        this.exmProceso = new Semaphore(SEM_SINC);
     }
 
     public int getIdProceso() {
@@ -50,13 +46,5 @@ public class RepresentaProceso {
                 resultado = true;
         }
         return resultado;
-    }
-    
-    public void bloqueaProceso() throws InterruptedException{
-        exmProceso.acquire();
-    }
-    
-    public void desbloqueaProceso() throws InterruptedException{
-        exmProceso.release();
-    }    
+    } 
 }

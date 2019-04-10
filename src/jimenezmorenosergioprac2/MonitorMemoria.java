@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.PRIMERA_POSICION;
 import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.SEM_EXM;
+import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.SEM_SINC;
 import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 
 /**
@@ -22,6 +23,7 @@ public class MonitorMemoria {
     private int numMarcos;
     private Semaphore exmMonitor;
     private HashMap<Integer,RepresentaProceso> listaProcesos;
+    private HashMap<Integer,Semaphore> listaSemaforos;
     private List<Peticion> listaPetiones;
     private List<Integer> listaPetionesLiberacion;
 
@@ -29,6 +31,7 @@ public class MonitorMemoria {
         numMarcos = NUM_MARCOS;
         exmMonitor = new Semaphore(SEM_EXM);
         listaProcesos = new HashMap<>();
+        listaSemaforos = new HashMap<>();
         listaPetiones = new ArrayList<>();
         listaPetionesLiberacion = new ArrayList<>();
     }
@@ -55,13 +58,14 @@ public class MonitorMemoria {
             if(peticion.getTipo() == Tipo.CARGA){
                 RepresentaProceso nuevoProceso = new RepresentaProceso(peticion.getIdProceso());
                 listaProcesos.put(peticion.getIdProceso(), nuevoProceso);
+                listaSemaforos.put(peticion.getIdProceso(),new Semaphore(SEM_SINC));
             }
             listaPetiones.add(peticion);
             proceso = listaProcesos.get(peticion.getIdProceso());
         }finally{
             exmMonitor.release();
             if(proceso != null)
-                proceso.bloqueaProceso();
+                bloqueaProceso(proceso.getIdProceso());
         }
     }
     
@@ -105,7 +109,7 @@ public class MonitorMemoria {
                 }
                 if(peticion != null){
                     RepresentaProceso proceso = listaProcesos.get(peticion.getIdProceso());
-                    proceso.desbloqueaProceso();
+                    desbloqueaProceso(peticion.getIdProceso());
                 }
             }
         }finally{
@@ -164,6 +168,14 @@ public class MonitorMemoria {
             }
         }
         return resultado;
+    }
+    
+    private void bloqueaProceso(int idProceso) throws InterruptedException{
+        listaSemaforos.get(idProceso).acquire();
+    }
+    
+    private void desbloqueaProceso(int idProceso) throws InterruptedException{
+        listaSemaforos.get(idProceso).release();
     }
     
     public void visualiza() {
