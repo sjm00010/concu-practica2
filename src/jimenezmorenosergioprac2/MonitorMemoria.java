@@ -18,9 +18,13 @@ public class MonitorMemoria {
     private final static int MAX_MARCOS = 4;
     private final static int MARCOS_INICIALES = 2;
     private final static int NUM_MARCOS = 20;
+    private final static int NULO = 0;
     
     // Variables
     private int numMarcos;
+    private int numMarcosMedios;
+    private int numFallos;
+    private int numProcesos;
     private Semaphore exmMonitor;
     private HashMap<Integer,RepresentaProceso> listaProcesos;
     private HashMap<Integer,Semaphore> listaSemaforos;
@@ -34,6 +38,9 @@ public class MonitorMemoria {
         listaSemaforos = new HashMap<>();
         listaPetiones = new ArrayList<>();
         listaPetionesLiberacion = new ArrayList<>();
+        numFallos = NULO;
+        numProcesos = NULO;
+        numMarcosMedios = NULO;
     }
     
     // Funciones publicas
@@ -59,6 +66,9 @@ public class MonitorMemoria {
                 RepresentaProceso nuevoProceso = new RepresentaProceso(peticion.getIdProceso());
                 listaProcesos.put(peticion.getIdProceso(), nuevoProceso);
                 listaSemaforos.put(peticion.getIdProceso(),new Semaphore(SEM_SINC));
+                numProcesos++;
+            }else{
+                numFallos++;
             }
             listaPetiones.add(peticion);
             proceso = listaProcesos.get(peticion.getIdProceso());
@@ -156,6 +166,7 @@ public class MonitorMemoria {
         RepresentaProceso proceso = listaProcesos.remove(idProceso);
         if(proceso != null){
             numMarcos += proceso.paginasAsignadas();
+            numMarcosMedios += proceso.paginasAsignadas();
         }
     }
     
@@ -181,6 +192,8 @@ public class MonitorMemoria {
     public void visualiza() {
         System.out.println("Peticiones de Liberación ("+listaPetionesLiberacion.size()+") : "+listaPetionesLiberacion);
         System.out.println("Peticiones de Asignación de Página ("+listaPetiones.size()+") : "+listaPetiones);
+        System.out.println("Numero medio de marcos : "+numMarcosMedios/numProcesos);
+        System.out.println("Fallo medio de paginas : "+numFallos/numProcesos);
     }
 
 }

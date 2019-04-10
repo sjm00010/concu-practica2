@@ -45,9 +45,12 @@ public class Proceso implements Runnable{
                     peticionFallo(paginaSolicitada);
                 }
             }
-            peticionLiberacion();
-            Date fin = new Date();
-            tiempoProceso(inicio, fin);
+            if(Thread.currentThread().isInterrupted()){
+                throw new InterruptedException();
+            }
+                peticionLiberacion();
+                Date fin = new Date();
+                tiempoProceso(inicio, fin);
         } catch (InterruptedException ex) {
             System.out.println("PROCESO("+id+") - Proceso interrumpido.");
         }
