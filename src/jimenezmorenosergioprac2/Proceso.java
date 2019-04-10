@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.NULO;
 import jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.Tipo;
 
 /**
@@ -24,12 +25,14 @@ public class Proceso implements Runnable{
     private int id;
     private int numIteraciones;
     private int paginasDisponibles;
+    private int numFallos;
 
     public Proceso(MonitorMemoria monitor, int id, int paginasDisponibles) {
         this.monitor = monitor;
         this.id = id;
         this.numIteraciones = generaInteraciones();
         this.paginasDisponibles = paginasDisponibles;
+        this.numFallos = NULO;
     }
     
     @Override
@@ -43,6 +46,7 @@ public class Proceso implements Runnable{
                 int paginaSolicitada = generaPagina();
                 if( !monitor.compruebaPagina(id, paginaSolicitada) ){
                     peticionFallo(paginaSolicitada);
+                    numFallos++;
                 }
             }
             if(Thread.currentThread().isInterrupted()){
@@ -82,6 +86,8 @@ public class Proceso implements Runnable{
         long tiempoServicio;
         tiempoServicio = fin.getTime() - inicio.getTime();
         tiempoServicio = TimeUnit.SECONDS.convert(tiempoServicio, TimeUnit.MILLISECONDS);
-        System.out.println("PROCESO("+id+") - Finalizado, tiempo de ejecución : "+tiempoServicio+" segundos");
+        System.out.println("PROCESO("+id+") - Tiempo de ejecución : "+tiempoServicio+" segundos");
+        System.out.println("PROCESO("+id+") - Finalizado, número de fallos de página : "+numFallos);
+        
     }
 }

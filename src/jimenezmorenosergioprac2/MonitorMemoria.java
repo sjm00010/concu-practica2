@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.NULO;
 import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.PRIMERA_POSICION;
 import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.SEM_EXM;
 import static jimenezmorenosergioprac2.JimenezMorenoSergioPrac2.SEM_SINC;
@@ -18,13 +19,13 @@ public class MonitorMemoria {
     private final static int MAX_MARCOS = 4;
     private final static int MARCOS_INICIALES = 2;
     private final static int NUM_MARCOS = 20;
-    private final static int NULO = 0;
     
     // Variables
     private int numMarcos;
     private int numMarcosMedios;
     private int numFallos;
     private int numProcesos;
+    private int numProcesosFinalizados;
     private Semaphore exmMonitor;
     private HashMap<Integer,RepresentaProceso> listaProcesos;
     private HashMap<Integer,Semaphore> listaSemaforos;
@@ -40,7 +41,9 @@ public class MonitorMemoria {
         listaPetionesLiberacion = new ArrayList<>();
         numFallos = NULO;
         numProcesos = NULO;
+        numProcesosFinalizados = NULO;
         numMarcosMedios = NULO;
+        
     }
     
     // Funciones publicas
@@ -83,6 +86,7 @@ public class MonitorMemoria {
         exmMonitor.acquire();
         try {
             listaPetionesLiberacion.add(idProceso);
+            numProcesosFinalizados++;
         }finally{
             exmMonitor.release();
         }
@@ -150,7 +154,7 @@ public class MonitorMemoria {
     private void falloPagina(int idProceso, int pagina){
         boolean asignado = false;
         
-        if( numMarcos > 0 ){
+        if( numMarcos > NULO ){
             asignado = asignarMarcos(idProceso, pagina);
         }
         
@@ -194,6 +198,7 @@ public class MonitorMemoria {
         System.out.println("Peticiones de Asignación de Página ("+listaPetiones.size()+") : "+listaPetiones);
         System.out.println("Numero medio de marcos : "+numMarcosMedios/numProcesos);
         System.out.println("Fallo medio de paginas : "+numFallos/numProcesos);
+        System.out.println("Número de procesos que no han concluido : "+(numProcesos-numProcesosFinalizados));
     }
 
 }

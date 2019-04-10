@@ -23,6 +23,7 @@ public class JimenezMorenoSergioPrac2 {
     public static final int PRIMERA_POSICION = 0;
     public static final int SEM_EXM = 1;
     public static final int SEM_SINC = 0;
+    public final static int NULO = 0;
     
     /**
      * @param args the command line arguments
